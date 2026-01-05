@@ -6,13 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Check files exist
         run: |
           echo "Checking project structure..."
           [ -f "backend/app/main.py" ] || exit 1
           [ -f "backend/requirements.txt" ] || exit 1
           echo "Required files exist"
-          
+
       - name: Success
         run: echo "Basic validation passed"
