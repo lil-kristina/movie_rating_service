@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from datetime import datetime
 
 from app.api.endpoints import movies
 from app.api.endpoints import genres
