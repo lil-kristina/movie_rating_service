@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
 from app.api.endpoints import movies
 from app.api.endpoints import genres
@@ -48,5 +50,12 @@ def health_check():
     return {
         "status": "healthy",
         "service": "Movie Rating API",
-        "timestamp": "2024-01-01T00:00:00Z"
+        "timestamp": datetime.now().isoformat()
     }
+
+@app.exception_handler(404)
+async def not_found(request: Request, exc):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "Ресурс не найден"}
+    )

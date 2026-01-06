@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Text, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
-from app.database.session import Base  # Теперь Base импортируется правильно
+from app.database.session import Base  
 
 class Movie(Base):
     __tablename__ = "movies"

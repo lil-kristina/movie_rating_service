@@ -2,13 +2,15 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
+CURRENT_YEAR = datetime.now().year
+
 # Базовые схемы
 class MovieBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: Optional[str] = None
     rating: Optional[float] = Field(None, ge=0, le=10)
     genres: List[str] = Field(default_factory=list)
-    release_year: int = Field(..., ge=1900, le=2024)
+    release_year: int = Field(..., ge=1900, le=CURRENT_YEAR)
 
 # Для создания фильма
 class MovieCreate(MovieBase):
@@ -20,7 +22,7 @@ class MovieUpdate(BaseModel):
     description: Optional[str] = None
     rating: Optional[float] = Field(None, ge=0, le=10)
     genres: Optional[List[str]] = None
-    release_year: Optional[int] = Field(None, ge=1900, le=2024)
+    release_year: Optional[int] = Field(None, ge=1900, le=CURRENT_YEAR)
 
 # Для ответа API
 class MovieResponse(MovieBase):
