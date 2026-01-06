@@ -19,10 +19,8 @@ def get_movies(
     """Получить список фильмов с фильтрацией"""
     query = db.query(Movie)
     
-    # Фильтрация по жанрам (если передан хотя бы один жанр)
     if genres:
-        # Ищем фильмы, у которых есть хотя бы один из указанных жанров
-        query = query.filter(Movie.genres.op('?|')(genres))
+        query = query.filter(Movie.genres.op('&&')(genres))
     
     # Фильтрация по рейтингу
     if min_rating is not None:
@@ -30,7 +28,7 @@ def get_movies(
     if max_rating is not None:
         query = query.filter(Movie.rating <= max_rating)
     
-    return query.offset(skip).limit(limit).all()
+    return query.order_by(Movie.id).offset(skip).limit(limit).all()
 
 def create_movie(db: Session, movie: MovieCreate) -> Movie:
     """Создать новый фильм"""

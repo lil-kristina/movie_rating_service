@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Text, DateTime
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import ARRAY  
 from sqlalchemy.sql import func
-from app.database.session import Base  # Теперь Base импортируется правильно
+from app.database.session import Base  
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -10,7 +10,7 @@ class Movie(Base):
     title = Column(String(200), nullable=False, index=True)
     description = Column(Text)
     rating = Column(Float)
-    genres = Column(JSONB, default=list)  # Храним как список: ["драма", "комедия"]
+    genres = Column(ARRAY(Text), default=list)  
     release_year = Column(Integer)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
