@@ -13,6 +13,7 @@ class Movie(Base):
     genres = Column(ARRAY(Text), default=list)  
     release_year = Column(Integer)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    poster_url = Column(String(500), nullable=True)
     
     def __repr__(self):
         return f"<Movie(id={self.id}, title='{self.title}', rating={self.rating})>"

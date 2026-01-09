@@ -1,0 +1,148 @@
+name: Develop Branch CI
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  validate-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate backend structure
+        run: |
+          echo "Checking backend structure..."
+          [ -f "backend/app/main.py" ] || { echo "ERROR: backend/app/main.py not found"; exit 1; }
+          [ -f "backend/requirements.txt" ] || { echo "ERROR: backend/requirements.txt not found"; exit 1; }
+          [ -f "backend/.env" ] || echo "WARNING: backend/.env not found"
+          
+          # Check API endpoints
+          [ -f "backend/app/api/endpoints/genres.py" ] || { echo "ERROR: genres.py endpoint not found"; exit 1; }
+          [ -f "backend/app/api/endpoints/movies.py" ] || { echo "ERROR: movies.py endpoint not found"; exit 1; }
+          
+          # Check database files
+          [ -f "backend/app/database/config.py" ] || { echo "ERROR: database config.py not found"; exit 1; }
+          [ -f "backend/app/database/session.py" ] || { echo "ERROR: database session.py not found"; exit 1; }
+          
+          # Check models and schemas
+          [ -f "backend/app/models/movie.py" ] || { echo "ERROR: movie.py model not found"; exit 1; }
+          [ -f "backend/app/schemas/movie.py" ] || { echo "ERROR: movie.py schema not found"; exit 1; }
+          
+          echo "Backend structure validation passed"
+
+      - name: Validate frontend structure
+        run: |
+          echo "Checking frontend structure..."
+          [ -f "frontend/index.html" ] || { echo "ERROR: frontend/index.html not found"; exit 1; }
+          [ -f "frontend/vite.config.js" ] || { echo "ERROR: vite.config.js not found"; exit 1; }
+          [ -f "frontend/src/App.vue" ] || { echo "ERROR: App.vue not found"; exit 1; }
+          [ -f "frontend/src/main.js" ] || { echo "ERROR: main.js not found"; exit 1; }
+          
+          # Check components
+          [ -f "frontend/src/components/MovieCard.vue" ] || { echo "ERROR: MovieCard.vue component not found"; exit 1; }
+          [ -f "frontend/src/components/MovieList.vue" ] || { echo "ERROR: MovieList.vue component not found"; exit 1; }
+          
+          # Check services and router
+          [ -f "frontend/src/router/index.js" ] || { echo "ERROR: router index.js not found"; exit 1; }
+          [ -f "frontend/src/services/api.js" ] || { echo "ERROR: api.js service not found"; exit 1; }
+          
+          # Check views
+          [ -f "frontend/src/views/GenresView.vue" ] || { echo "ERROR: GenresView.vue not found"; exit 1; }
+          [ -f "frontend/src/views/HomeView.vue" ] || { echo "ERROR: HomeView.vue not found"; exit 1; }
+          [ -f "frontend/src/views/MoviesView.vue" ] || { echo "ERROR: MoviesView.vue not found"; exit 1; }
+          
+          echo "Frontend structure validation passed"
+
+      - name: Check project root files
+        run: |
+          echo "Checking project root files..."
+          [ -f ".gitignore" ] || echo "WARNING: .gitignore not found"
+          [ -f "readme.md" ] || [ -f "README.md" ] || echo "WARNING: README.md not found"
+          
+          echo "Project root validation passed"
+
+      - name: Success
+        run: echo "All validations passed for develop branch"
+
+  python-check:
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Check Python syntax
+        run: |
+          echo "Checking Python files syntax..."
+          python -m py_compile backend/app/main.py || exit 1
+          
+          # Check all Python files in app directory
+          find backend/app -name "*.py" -exec python -m py_compile {} \;
+          
+          echo "Python syntax validation passed"
+
+      - name: Validate requirements.txt
+        run: |
+          echo "Checking requirements.txt format..."
+          if [ -f "backend/requirements.txt" ]; then
+            if grep -q "==" "backend/requirements.txt"; then
+              echo "requirements.txt has valid format"
+            else
+              echo "WARNING: requirements.txt may not have version pins"
+            fi
+          fi
+
+  test-backend:
+    runs-on: ubuntu-latest
+    needs: python-check
+    if: success()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Check for tests
+        run: |
+          echo "Checking test structure..."
+          if [ -d "backend/tests" ]; then
+            echo "Test directory found"
+            if [ -f "$(find backend/tests -name '*.py' | head -1)" ]; then
+              echo "Python test files found"
+            else
+              echo "WARNING: No Python test files in tests directory"
+            fi
+          else
+            echo "WARNING: backend/tests directory not found"
+          fi
+
+  final:
+    runs-on: ubuntu-latest
+    needs: [validate-structure, python-check, test-backend]
+    if: always()
+    steps:
+      - name: Completion status
+        run: |
+          if [ "${{ needs.validate-structure.result }}" == "success" ] && \
+             [ "${{ needs.python-check.result }}" == "success" ]; then
+            echo "DEVELOP BRANCH CI COMPLETED SUCCESSFULLY"
+            echo "All structure validations passed"
+            echo "Python files are syntactically valid"
+          else
+            echo "CI VALIDATION FAILED"
+            echo "Check the previous steps for details"
+            exit 1
+          fi

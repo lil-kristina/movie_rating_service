@@ -37,7 +37,9 @@ def create_movie(db: Session, movie: MovieCreate) -> Movie:
         description=movie.description,
         rating=movie.rating,
         genres=movie.genres,
-        release_year=movie.release_year
+        release_year=movie.release_year,
+        poster_url=movie.poster_url
+        
     )
     db.add(db_movie)
     db.commit()
