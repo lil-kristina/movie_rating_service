@@ -39,28 +39,150 @@
 - должен применяться  github/git flow    +
 
 ## Запуск проекта (Git Bash, Windows)
-1. Клонирование репозитория
+### 1. Клонирование репозитория
 ```bash
 git clone <ваш-репозиторий>
 cd movie_rating_service
 ```
-
-2. Настройка бэкенда (FastAPI)
+### 2. Настройка бэкенда (FastAPI)
 ```bash
 # Перейдите в папку бэкенда
 cd backend
 
-# Создайте виртуальное окружение (Windows)
+# Создайте виртуальное окружение 
 python -m venv venv
 
-# Активируйте виртуальное окружение (Windows)
-venv\Scripts\activate
-
-# Или для Linux/Mac:
-# python3 -m venv venv
-# source venv/bin/activate
+# Активируйте виртуальное окружение 
+source venv\Scripts\activate
 
 # Установите зависимости
 pip install -r requirements.txt
 ```
+### 3. Настройка базы данных PostgreSQL:
+   - Установите PostgreSQL
+   - Создайте базу данных:
+```sql
+CREATE DATABASE movie_db;
+CREATE USER postgres WITH PASSWORD 'postgres';
+GRANT ALL PRIVILEGES ON DATABASE movie_db TO postgres;
+```
+### 4. Создайте файл backend/.env:
+```text
+DATABASE_URL=postgresql://postgres:postgres@localhost/movie_db
+```
+### 5. Создание таблиц в БД:
+```bash
+cd backend
+python -c "
+from app.database.session import Base, engine
+from app.models.movie import Movie
+Base.metadata.create_all(bind=engine)
+print('Таблицы созданы')
+"
+```
+### 6. Настройка фронтенда (Vue.js)
+Установка зависимостей Node.js:
+```bash
+# Перейдите в папку фронтенда
+cd frontend
+
+# Установите зависимости
+npm install
+```
+Настройка прокси (Vite):
+Убедитесь что в frontend/vite.config.js есть:
+```javascript
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    port: 5173,
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
+})
+```
+### 7. Запуск проекта
+Запуск в отдельных терминалах!!!!!!!!!!!!!!!!!!
+Терминал 1 - Бэкенд:
+```bash
+cd backend
+uvicorn app.main:app --reload
+```
+- Бэкенд будет доступен по адресу: http://localhost:8000
+- API: http://localhost:8000/api/movies/
+- Документация: http://localhost:8000/docs
+
+Терминал 2 - Фронтенд:
+```bash
+cd frontend
+npm run dev
+```
+- Фронтенд будет доступен по адресу: http://localhost:5173
+
+### Проверка работоспособности
+- Бэкенд работает: http://localhost:8000/health
+- API работает: http://localhost:8000/api/movies/
+- Фронтенд работает: http://localhost:5173
+- CORS настроен: Фронтенд может делать запросы к API
+
+### Структура проекта после установки
+```text
+movie_rating_service/
+├── .github/workflows/
+│   └── ci.yml                 # CI пайплайн
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── endpoints/
+│   │   │       ├── genres.py  # Эндпоинты для жанров
+│   │   │       └── movies.py  # Эндпоинты для фильмов (CRUD+фильтрация)
+│   │   ├── crud/
+│   │   │   └── movies.py      # CRUD операции для фильмов
+│   │   ├── database/
+│   │   │   ├── config.py      # Конфигурация БД
+│   │   │   └── session.py     # Сессия БД (SQLAlchemy)
+│   │   ├── models/
+│   │   │   └── movie.py       # Модель SQLAlchemy
+│   │   ├── schemas/
+│   │   │   └── movie.py       # Pydantic схемы
+│   │   └── main.py            # Точка входа FastAPI приложения
+│   ├── tests/                 # Тесты
+│   ├── venv/                  # Виртуальное окружение Python
+│   ├── .env                   # Переменные окружения
+│   └── requirements.txt       # Зависимости Python
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── MovieCard.vue  # Компонент карточки фильма
+│   │   │   └── MovieList.vue  # Компонент списка фильмов
+│   │   ├── router/
+│   │   │   └── index.js       # Маршрутизация Vue Router
+│   │   ├── services/
+│   │   │   └── api.js         # API клиент для бэкенда
+│   │   ├── views/
+│   │   │   ├── GenresView.vue # Страница жанров
+│   │   │   ├── HomeView.vue   # Главная страница
+│   │   │   └── MoviesView.vue # Страница фильмов
+│   │   ├── App.vue            # Корневой компонент
+│   │   └── main.js            # Точка входа Vue приложения
+│   ├── index.html             # HTML шаблон
+│   └── vite.config.js         # Конфигурация Vite
+├── .gitignore
+└── README.md
+```
+
+
+
+
+
+
 
