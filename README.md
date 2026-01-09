@@ -53,7 +53,7 @@ cd backend
 python -m venv venv
 
 # Активируйте виртуальное окружение 
-source venv\Scripts\activate
+source venv/Scripts/activate
 
 # Установите зависимости
 pip install -r requirements.txt
