@@ -25,8 +25,8 @@
 - **CSS3** - стилизация
 
 ## Разработчики 
-- Backend - Седова Кристина Александровна
-- Frontend - Макарова Мария Сергеевна
+- Backend - Седова Кристина 
+- Frontend - Макарова Мария 
 
 ## Требования к проекту:
 - необходимо реализовать тему полностью    +
@@ -63,12 +63,12 @@ pip install -r requirements.txt
    - Создайте базу данных:
 ```sql
 CREATE DATABASE movie_db;
-CREATE USER postgres WITH PASSWORD 'postgres';
+CREATE USER postgres WITH PASSWORD ***;
 GRANT ALL PRIVILEGES ON DATABASE movie_db TO postgres;
 ```
 ### 4. Создайте файл backend/.env:
 ```text
-DATABASE_URL=postgresql://postgres:postgres@localhost/movie_db
+DATABASE_URL=postgresql://postgres:ВАШ_ПАРОЛЬ@localhost/movie_db
 ```
 ### 5. Создание таблиц в БД:
 ```bash
